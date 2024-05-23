@@ -58,7 +58,7 @@ postgresql_dist_redhat:
 postgresql_dist_debian:
   bindir: /usr/lib/postgresql/{{ postgresql_version }}/bin
   confdir: /etc/postgresql/{{ postgresql_version }}/main
-  conf_postgresql_src: postgresql-conf-10-ubuntu.j2
+  conf_postgresql_src: postgresql-conf.j2
   datadir: /var/lib/postgresql/{{ postgresql_version }}/main
   basename: postgresql-{{ postgresql_version }}
   service: postgresql

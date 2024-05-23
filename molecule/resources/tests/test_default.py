@@ -2,7 +2,6 @@ import os
 import pytest
 import testinfra.utils.ansible_runner
 import uuid
-from re import match
 from utils import get_version
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -40,12 +39,15 @@ def test_server_listen(host):
 
     count_listen_addresses = 0
     for line in f.split('\n'):
-        if match(r'\s*listen_addresses', line):
+        if 'listen_addresses' in line:
             count_listen_addresses += 1
             listen_addresses = line
     assert count_listen_addresses == 1
-
-    assert listen_addresses == "listen_addresses = localhost"
+    if line.startswith('#'):
+        sub_line = listen_addresses.split('#')[0].strip()
+    else:
+        sub_line = listen_addresses.split('#')[1].strip()
+    assert sub_line == "listen_addresses = 'localhost'"
 
 
 def test_psql_version(host):
