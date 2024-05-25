@@ -1,6 +1,8 @@
 #Modified by ome postgresql ansible role
 {{ postgres_config_file_contents['content'] | b64decode | regex_replace('}$', '')  }}
 
+listen_addresses = {{ postgresql_server_listen }}
+
 {% for option in (postgresql_server_conf | sort) %}
 {{ option }} = {{ postgresql_server_conf[option] }}
 {% endfor %}

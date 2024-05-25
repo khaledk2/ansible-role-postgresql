@@ -31,16 +31,49 @@
       changed_when: false
       register: config_file_changed
 
+    - name: postgres | Check that the postgresql.conf.backup file exists
+      ansible.builtin.stat:
+        path: "{{ postgresql_dist_confdir }}/postgresql.conf.backup"
+      register: backup_result
+
+
     # read the default postgresql configuration file
     - name: postgres | get the postgres conf file contents
       become_user: "{{ postgresql_become_user }}"
       ansible.builtin.slurp:
         src: "{{ postgresql_dist_confdir }}/postgresql.conf"
-      register: postgres_config_file_contents
-      when: config_file_changed.found | default(0) == 0
+      register: postgres_config_file_contents_o
+      when:
+        - not backup_result.stat.exists
 
+    # read the default postgresql configuration file
+    - name: postgres | get the postgres conf file contents from backup
+      become_user: "{{ postgresql_become_user }}"
+      ansible.builtin.slurp:
+        src: "{{ postgresql_dist_confdir }}/postgresql.conf.backup"
+      register: postgres_config_file_contents_b
+      when: backup_result.stat.exists
 
-    - name: postgres | postgresql config file
+    - set_fact: postgres_config_file_contents={{ postgres_config_file_contents_o }}
+      when:
+        - not backup_result.stat.exists
+
+    - set_fact: postgres_config_file_contents={{ postgres_config_file_contents_b }}
+      when:
+        - backup_result.stat.exists
+
+    - name: postgres | Copy a postgresql.conf to postgresql.conf.backup
+      become_user: "{{ postgresql_become_user }}"
+      ansible.builtin.copy:
+        src: "{{ postgresql_dist_confdir }}/postgresql.conf"
+        dest: "{{ postgresql_dist_confdir }}/postgresql.conf.backup"
+        remote_src: yes
+      when:
+        - not backup_result.stat.exists
+        - config_file_changed.found | default(0) == 0
+
+    - name: postgres | copy postgresql config file
+      become_user: "{{ postgresql_become_user }}"
       ansible.builtin.template:
         dest: >-
           {{ postgresql_dist_confdir }}/postgresql.conf
@@ -49,18 +82,17 @@
         owner: "{{ postgresql_become_user }}"
       notify:
         - restart postgresql
-      when: config_file_changed.found | default(0) == 0
-
+      when:
+        - config_file_changed.found | default(0) == 0 or backup_result.stat.exists
 
     - name: postgres | configure client authorisation
+      become_user: "{{ postgresql_become_user }}"
       template:
         dest: "{{ postgresql_dist_confdir }}/pg_hba.conf"
         src: pg_hba-conf.j2
         mode: 0640
       notify:
         - restart postgresql
-
-      become_user: "{{ postgresql_become_user }}"
 
     - name: postgres | start service
       service:

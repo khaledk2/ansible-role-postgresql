@@ -2,6 +2,7 @@ import os
 import pytest
 import testinfra.utils.ansible_runner
 import uuid
+from re import match
 from utils import get_version
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -39,15 +40,23 @@ def test_server_listen(host):
 
     count_listen_addresses = 0
     for line in f.split('\n'):
-        if 'listen_addresses' in line:
+        if match(r'\s*listen_addresses', line):
             count_listen_addresses += 1
             listen_addresses = line
     assert count_listen_addresses == 1
-    if line.startswith('#'):
-        sub_line = listen_addresses.split('#')[0].strip()
+
+    assert listen_addresses == "listen_addresses = localhost"
+
+
+def test_backup_config_exist(host):
+    version = get_version(host)
+    if host.system_info.distribution == 'rocky':
+        config_backup = '/var/lib/pgsql/{version}/data/postgresql.conf.backup'
     else:
-        sub_line = listen_addresses.split('#')[1].strip()
-    assert sub_line == "listen_addresses = 'localhost'"
+        config_backup = '/etc/postgresql/{version}/main/postgresql.conf.backup'
+    with host.sudo():
+        backup_file = config_backup.format(version=version)
+        assert host.file(backup_file).is_file
 
 
 def test_psql_version(host):
@@ -55,8 +64,6 @@ def test_psql_version(host):
     out = host.check_output('psql --version')
     assert out.startswith('psql (PostgreSQL) {}.'.format(ver))
 
-
-# Create
 
 def createdb(host, db, should_pass, password, name):
     try:
