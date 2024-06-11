@@ -53,7 +53,7 @@ postgresql_dist_redhat:
       (postgresql_package_version | length > 0) |
       ternary('-' + postgresql_package_version, '')
     }}
-   conf_sample_file: "/usr/pgsql-{{ postgresql_version }}/share/postgresql.conf.sample"
+  conf_sample_file: "/usr/pgsql-{{ postgresql_version }}/share/postgresql.conf.sample"
 
 # Attributes are parsed and used to set facts at tasks/debian.yml.
 # Debian variation, following the same principles of postgresql_dist_redhat
