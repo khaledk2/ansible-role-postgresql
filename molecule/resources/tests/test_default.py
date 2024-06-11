@@ -51,9 +51,9 @@ def test_server_listen(host):
 def test_backup_config_exist(host):
     version = get_version(host)
     if host.system_info.distribution == 'rocky':
-        config_backup = '/var/lib/pgsql/{version}/data/postgresql.conf.backup'
+        config_backup = '/var/lib/pgsql/{version}/data/postgresql.conf.org'
     else:
-        config_backup = '/etc/postgresql/{version}/main/postgresql.conf.backup'
+        config_backup = '/etc/postgresql/{version}/main/postgresql.conf.org'
     with host.sudo():
         backup_file = config_backup.format(version=version)
         assert host.file(backup_file).is_file

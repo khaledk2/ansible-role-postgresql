@@ -53,6 +53,7 @@ postgresql_dist_redhat:
       (postgresql_package_version | length > 0) |
       ternary('-' + postgresql_package_version, '')
     }}
+   conf_sample_file: "/usr/pgsql-{{ postgresql_version }}/share/postgresql.conf.sample"
 
 # Attributes are parsed and used to set facts at tasks/debian.yml.
 # Debian variation, following the same principles of postgresql_dist_redhat
@@ -62,4 +63,17 @@ postgresql_dist_debian:
   conf_postgresql_src: postgresql-conf.j2
   datadir: /var/lib/postgresql/{{ postgresql_version }}/main
   basename: postgresql-{{ postgresql_version }}
+  conf_sample_file: "/usr/share/postgresql/{{ postgresql_version }}/postgresql.conf.sample"
   service: postgresql
+
+# conf_sample_file: sample configuration file, it should be copied during the installation by the installation package
+
+# the following two variables are used to download link ofr the source to get the sample configuration file
+# It will be used in case of the sample file is not find locally for any reason
+versions_source_download:
+  13: "13.15"
+  14: "14.12"
+  15: "15.7"
+  16: "16.3"
+
+source_download_linnk: "https://ftp.postgresql.org/pub/source/v{{ versions_source_download [postgresql_version] }}/postgresql-{{ versions_source_download [postgresql_version] }}.tar.gz"

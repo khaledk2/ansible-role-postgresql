@@ -1,5 +1,6 @@
 ---
 # tasks file for ome.postgresql
+##Ansible managed
 
 - block:
     - name: postgres | set permissions on data directory
@@ -25,7 +26,7 @@
     - name: postgres | Check for presence of "Modified by ome postgresql ansible role" in file
       ansible.builtin.lineinfile:
         path: "{{ postgresql_dist_confdir }}/postgresql.conf"
-        line: "#Modified by ome postgresql ansible role"
+        line: "#Ansible managed"
         state: absent
       check_mode: yes
       changed_when: false
@@ -33,9 +34,8 @@
 
     - name: postgres | Check that the postgresql.conf.backup file exists
       ansible.builtin.stat:
-        path: "{{ postgresql_dist_confdir }}/postgresql.conf.backup"
-      register: backup_result
-
+        path: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
+      register: org_file
 
     # read the default postgresql configuration file
     - name: postgres | get the postgres conf file contents
@@ -44,33 +44,69 @@
         src: "{{ postgresql_dist_confdir }}/postgresql.conf"
       register: postgres_config_file_contents_o
       when:
-        - not backup_result.stat.exists
+        - not org_file.stat.exists
 
-    # read the default postgresql configuration file
-    - name: postgres | get the postgres conf file contents from backup
+    - name: Print the org_file.stat.exists
+      ansible.builtin.debug:
+       msg:
+       - System 1 {{ org_file.stat.exists }} and {{ config_file_changed.found }}
+       - "{{ postgresql_dist_confdir }}/postgresql.conf.org"
+       - "{{ postgresql_dist_redhat.conf_sample_file }}"
+
+    - name: postgres | get the orginal configuration file
+      become_user: "{{ postgresql_become_user }}"
+      import_tasks: org_config_file.yml
+      when:
+        - not org_file.stat.exists
+        - config_file_changed.found
+
+    - name: postgres | get the orginal configuration file
       become_user: "{{ postgresql_become_user }}"
       ansible.builtin.slurp:
-        src: "{{ postgresql_dist_confdir }}/postgresql.conf.backup"
+        src: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
+      register: postgres_config_file_contents_c
+      when:
+        - not org_file.stat.exists
+        - config_file_changed.found
+
+
+    # read the default postgresql configuration file
+    - name: postgres | get the postgres conf file contents from org
+      become_user: "{{ postgresql_become_user }}"
+      ansible.builtin.slurp:
+        src: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
       register: postgres_config_file_contents_b
-      when: backup_result.stat.exists
+      when: org_file.stat.exists
+
 
     - set_fact: postgres_config_file_contents={{ postgres_config_file_contents_o }}
       when:
-        - not backup_result.stat.exists
+        - not org_file.stat.exists
 
     - set_fact: postgres_config_file_contents={{ postgres_config_file_contents_b }}
       when:
-        - backup_result.stat.exists
+        - org_file.stat.exists
 
-    - name: postgres | Copy a postgresql.conf to postgresql.conf.backup
+    - set_fact: postgres_config_file_contents={{ postgres_config_file_contents_c }}
+      when:
+        - not org_file.stat.exists
+        - config_file_changed.found
+
+    - name: postgres | Copy a postgresql.conf to postgresql.conf.org
       become_user: "{{ postgresql_become_user }}"
       ansible.builtin.copy:
         src: "{{ postgresql_dist_confdir }}/postgresql.conf"
-        dest: "{{ postgresql_dist_confdir }}/postgresql.conf.backup"
+        dest: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
         remote_src: yes
       when:
-        - not backup_result.stat.exists
+        - not org_file.stat.exists
         - config_file_changed.found | default(0) == 0
+
+    - name: Print the org_file.stat.exists
+      ansible.builtin.debug:
+        msg: System {{ org_file.stat.exists }} and {{ config_file_changed.found }}
+      # when:
+      #  -  (not org_file.stat.exists and config_file_changed.found) or  config_file_changed.found or org_file.stat.exists
 
     - name: postgres | copy postgresql config file
       become_user: "{{ postgresql_become_user }}"
@@ -82,8 +118,9 @@
         owner: "{{ postgresql_become_user }}"
       notify:
         - restart postgresql
-      when:
-        - config_file_changed.found | default(0) == 0 or backup_result.stat.exists
+      when: (not org_file.stat.exists and config_file_changed.found) or  not config_file_changed.found or org_file.stat.exists
+        # -  not org_file.stat.exists
+        # - config_file_changed.found
 
     - name: postgres | configure client authorisation
       become_user: "{{ postgresql_become_user }}"

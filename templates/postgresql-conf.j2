@@ -1,4 +1,4 @@
-#Modified by ome postgresql ansible role
+#{{ ansible_managed }}
 {{ postgres_config_file_contents['content'] | b64decode | regex_replace('}$', '')  }}
 
 listen_addresses = {{ postgresql_server_listen }}

@@ -1,0 +1,45 @@
+---
+# get the original configuration file
+
+- name: postgres | Check that the postgresql.conf.sample file exists (ubuntu)
+  ansible.builtin.stat:
+    path: "{{ postgresql_dist_debian.conf_sample_file }}"
+  register: conf_sample_file
+  when: ansible_os_family | lower == 'debian'
+
+- name: postgres | postgres | Check that the postgresql.conf.sample file exists (redhat)
+  ansible.builtin.stat:
+    path: "{{ postgresql_dist_redhat.conf_sample_file }}"
+  register: conf_sample_file
+  when: ansible_os_family | lower == 'redhat'
+
+- name: postgres | copy the sample file to org
+  become_user: "{{ postgresql_become_user }}"
+  ansible.builtin.copy:
+    src: "{{ postgresql_dist_redhat.conf_sample_file }}"
+    dest: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
+  when:
+    -  conf_sample_file.stat.exists
+
+- name: postgres | download the source code
+  ansible.builtin.get_url:
+    url: "{{ source_download_linnk }}"
+    dest: /tmp/postgresql.tar.gz
+  when:
+    - not conf_sample_file.stat.exists
+
+- name: postgres | extract the files
+  ansible.builtin.unarchive:
+    src: /tmp/postgresql.tar.gz
+    dest: /tmp
+    remote_src: yes
+  when:
+    - not conf_sample_file.stat.exists
+
+- name: postgres |  copy the file to org file
+  become_user: "{{ postgresql_become_user }}"
+  ansible.builtin.copy:
+    src: "/tmp/postgresql-{{ versions_source_download [postgresql_version] }}/src/backend/utils/misc/postgresql.conf.sample"
+    dest: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
+  when:
+    - not conf_sample_file.stat.exists
