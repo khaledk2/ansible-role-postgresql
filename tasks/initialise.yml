@@ -73,7 +73,6 @@
         owner: "{{ postgresql_become_user }}"
       notify:
         - restart postgresql
-      when: (not org_file.stat.exists and config_file_changed.found) or  not config_file_changed.found or org_file.stat.exists
 
     - name: postgres | configure client authorisation
       become_user: "{{ postgresql_become_user }}"
