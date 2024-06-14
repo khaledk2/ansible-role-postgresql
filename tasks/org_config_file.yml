@@ -7,7 +7,7 @@
   register: conf_sample_file
   when: ansible_os_family | lower == 'debian'
 
-- name: postgres | postgres | Check that the postgresql.conf.sample file exists (redhat)
+- name: postgres | Check that the postgresql.conf.sample file exists (redhat)
   ansible.builtin.stat:
     path: "{{ postgresql_dist_redhat.conf_sample_file }}"
   register: conf_sample_file

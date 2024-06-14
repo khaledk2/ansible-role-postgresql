@@ -23,7 +23,7 @@
         PGSETUP_INITDB_OPTIONS: >-
           --encoding=UTF8 --locale=en_US.UTF-8 --auth-host=md5
 
-    - name: postgres | check for presence of "Modified by ome postgresql ansible role" in file
+    - name: postgres | check for presence of "#Ansible Managed" in file
       ansible.builtin.lineinfile:
         path: "{{ postgresql_dist_confdir }}/postgresql.conf"
         line: "#Ansible managed"
@@ -32,7 +32,7 @@
       changed_when: false
       register: config_file_changed
 
-    - name: postgres | check that the postgresql.conf.backup file exists
+    - name: postgres | check that the postgresql.conf.org file exists
       ansible.builtin.stat:
         path: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
       register: org_file
