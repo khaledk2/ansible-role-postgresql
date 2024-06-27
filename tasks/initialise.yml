@@ -23,19 +23,23 @@
         PGSETUP_INITDB_OPTIONS: >-
           --encoding=UTF8 --locale=en_US.UTF-8 --auth-host=md5
 
-    - name: postgres | check for presence of "#Ansible Managed" in file
-      ansible.builtin.lineinfile:
-        path: "{{ postgresql_dist_confdir }}/postgresql.conf"
-        line: "#Ansible managed"
-        state: absent
-      check_mode: yes
-      changed_when: false
-      register: config_file_changed
-
     - name: postgres | check that the postgresql.conf.org file exists
       ansible.builtin.stat:
         path: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
       register: org_file
+
+    - name: postgres | remove the custom configurations from the file, if any
+      command: sed -i '/# Add settings for extensions here/q' "{{ postgresql_dist_confdir }}/postgresql.conf"
+      when:
+        - not org_file.stat.exists
+
+    - name: postgres | remove the Ansible managed line, if any
+      ansible.builtin.lineinfile:
+          path: "{{ postgresql_dist_confdir }}/postgresql.conf"
+          regexp: "#Ansible managed"
+          state: absent
+      when:
+        - not org_file.stat.exists
 
     - name: postgres | copy a postgresql.conf to postgresql.conf.org
       become_user: "{{ postgresql_become_user }}"
@@ -44,15 +48,7 @@
         dest: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
         remote_src: yes
       when:
-        - not config_file_changed.found
         - not org_file.stat.exists
-
-    - name: postgres | get the orginal configuration file
-      become_user: "{{ postgresql_become_user }}"
-      import_tasks: org_config_file.yml
-      when:
-        - not org_file.stat.exists
-        - config_file_changed.found
 
     # read the default postgresql configuration file
     - name: postgres | get the postgres conf file contents
