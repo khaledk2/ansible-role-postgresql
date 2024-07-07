@@ -47,6 +47,7 @@
         src: "{{ postgresql_dist_confdir }}/postgresql.conf"
         dest: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
         remote_src: yes
+      check_mode: false
       when:
         - not org_file.stat.exists
 
@@ -69,6 +70,15 @@
         owner: "{{ postgresql_become_user }}"
       notify:
         - restart postgresql
+
+    - name: postgres | Remove org config file in check mode and file does not exist
+      ansible.builtin.file:
+        path: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
+        state: absent
+      check_mode: false
+      when:
+        - not org_file.stat.exists
+        - ansible_check_mode
 
     - name: postgres | configure client authorisation
       become_user: "{{ postgresql_become_user }}"
