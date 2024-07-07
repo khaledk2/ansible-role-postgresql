@@ -1,6 +1,5 @@
 ---
 # tasks file for ome.postgresql
-##Ansible managed
 
 - block:
     - name: postgres | set permissions on data directory

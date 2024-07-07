@@ -63,8 +63,3 @@ postgresql_dist_debian:
   datadir: /var/lib/postgresql/{{ postgresql_version }}/main
   basename: postgresql-{{ postgresql_version }}
   service: postgresql
-
-# conf_sample_file: sample configuration file, it should be copied during the installation by the installation package
-
-# the following two variables are used to download link ofr the source to get the sample configuration file
-# It will be used in case of the sample file is not find locally for any reason
