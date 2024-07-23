@@ -70,7 +70,7 @@
       notify:
         - restart postgresql
 
-    - name: postgres | Remove org config file in check mode and file does not exist
+    - name: postgres | Remove the org config file if it runs in a check mode and the org file does not exist in the host
       ansible.builtin.file:
         path: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
         state: absent
