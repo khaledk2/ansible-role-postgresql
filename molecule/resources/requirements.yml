@@ -1,2 +1,5 @@
 ---
-- src: ome.postgresql_client
+# - src: ome.postgresql_client
+- name: postgresql_client
+  src: https://github.com/pwalczysko/ansible-role-postgresql-client
+  version: update
