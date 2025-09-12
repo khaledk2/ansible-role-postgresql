@@ -111,5 +111,7 @@
 
   become: true
   become_user: "{{ postgresql_become_user }}"
+  # Need to install VM-wide packages (e.g. libselinux-python3)
+  # using the "native" python for the VM - otherwise the task fails
   vars:
     ansible_python_interpreter: "/usr/bin/python"
