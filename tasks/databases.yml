@@ -111,3 +111,5 @@
 
   become: true
   become_user: "{{ postgresql_become_user }}"
+  vars:
+    ansible_python_interpreter: "/usr/bin/python"
