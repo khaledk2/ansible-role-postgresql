@@ -114,4 +114,4 @@
   # Need to install VM-wide packages (e.g. libselinux-python3)
   # using the default python implementation - otherwise the task fails
   vars:
-    ansible_python_interpreter: "/usr/bin/python"
+    ansible_python_interpreter: "/usr/bin/python3"
