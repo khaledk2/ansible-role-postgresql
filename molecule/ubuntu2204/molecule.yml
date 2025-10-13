@@ -31,6 +31,20 @@ platforms:
     cgroupns_mode: host
     tmpfs:
       - /sys/fs/cgroup
+  - name: postgresql-17-u2204
+    image: eniocarboni/docker-ubuntu-systemd:22.04
+    command: /sbin/init
+    privileged: true
+    cgroupns_mode: host
+    tmpfs:
+      - /sys/fs/cgroup
+  - name: postgresql-18-u2204
+    image: eniocarboni/docker-ubuntu-systemd:22.04
+    command: /sbin/init
+    privileged: true
+    cgroupns_mode: host
+    tmpfs:
+      - /sys/fs/cgroup
 provisioner:
   name: ansible
   lint:
@@ -45,6 +59,12 @@ provisioner:
         ansible_python_interpreter: /usr/bin/python3
       postgresql-16-u2204:
         postgresql_version: "16"
+        ansible_python_interpreter: /usr/bin/python3
+      postgresql-17-u2204:
+        postgresql_version: "17"
+        ansible_python_interpreter: /usr/bin/python3
+      postgresql-18-u2204:
+        postgresql_version: "18"
         ansible_python_interpreter: /usr/bin/python3
     group_vars:
       extra_options:
