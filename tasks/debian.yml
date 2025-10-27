@@ -5,6 +5,7 @@
   become: true
   ansible.builtin.apt:
     update_cache: true
+    cache_valid_time: 86400
     name: >-
       {{ postgresql_dist_debian.basename }}
     state: present
@@ -13,6 +14,7 @@
   become: true
   ansible.builtin.apt:
     update_cache: true
+    cache_valid_time: 86400
     # Needs to match the Ansible interpreter
     name: >-
       python{{
