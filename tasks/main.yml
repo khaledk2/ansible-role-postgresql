@@ -1,6 +1,6 @@
 ---
 - name: postgres | Include ome.postgresql_client role
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: ome.postgresql_client
 
 # tasks file for ome.postgresql
