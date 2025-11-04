@@ -3,7 +3,7 @@
 
 - block:
     - name: postgres | set permissions on data directory
-      file:
+      ansible.builtin.file:
         owner: postgres
         group: postgres
         path: "{{ postgresql_dist_datadir }}"
@@ -14,7 +14,7 @@
     - name: >-
         postgres | initialise PostgreSQL cluster (skip if data directory
         already exists)
-      command: "{{ postgresql_dist_setup }}"
+      ansible.builtin.command: "{{ postgresql_dist_setup }}"
       args:
         creates: "{{ postgresql_dist_datadir }}/PG_VERSION"
 
@@ -28,7 +28,7 @@
       register: org_file
 
     - name: postgres | remove the custom configurations from the file, if any
-      command: sed -i '/# Add settings for extensions here/q' "{{ postgresql_dist_confdir }}/postgresql.conf"
+      ansible.builtin.command: sed -i '/# Add settings for extensions here/q' "{{ postgresql_dist_confdir }}/postgresql.conf"
       when:
         - not org_file.stat.exists
 
@@ -57,7 +57,8 @@
         src: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
       register: postgres_config_file_contents_o
 
-    - set_fact: postgres_config_file_contents={{ postgres_config_file_contents_o }}
+    - name: postgres | put the postgres file content into a variable
+      ansible.builtin.set_fact: postgres_config_file_contents={{ postgres_config_file_contents_o }}
 
     - name: postgres | copy postgresql config file
       become_user: "{{ postgresql_become_user }}"
@@ -81,7 +82,7 @@
 
     - name: postgres | configure client authorisation
       become_user: "{{ postgresql_become_user }}"
-      template:
+      ansible.builtin.template:
         dest: "{{ postgresql_dist_confdir }}/pg_hba.conf"
         src: pg_hba-conf.j2
         mode: 0640
@@ -89,7 +90,7 @@
         - restart postgresql
 
     - name: postgres | start service
-      service:
+      ansible.builtin.service:
         enabled: true
         name: "{{ postgresql_dist_service }}"
         state: started

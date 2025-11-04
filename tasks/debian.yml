@@ -23,7 +23,7 @@
     state: present
 
 - name: postgres | set debian dist variables
-  set_fact:
+  ansible.builtin.set_fact:
     postgresql_dist_datadir: "{{ postgresql_dist_debian.datadir }}"
     postgresql_dist_bindir: "{{ postgresql_dist_debian.bindir }}"
     postgresql_dist_confdir: "{{ postgresql_dist_debian.confdir }}"
