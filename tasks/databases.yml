@@ -4,7 +4,7 @@
 
 - block:
     - name: postgres | create users
-      postgresql_user:
+      community.postgresql.postgresql_user:
         encrypted: true
         name: "{{ item.user }}"
         password: "{{ item.password }}"
@@ -14,7 +14,7 @@
         - "{{ postgresql_users }}"
 
     - name: postgres | create databases
-      postgresql_db:
+      community.postgresql.postgresql_db:
         name: "{{ item.name }}"
         owner: "{{ item.owner | default(omit) }}"
         state: present
@@ -49,7 +49,7 @@
     # privilege for functions; and USAGE privilege for languages."
 
     - name: postgres | revoke default permissions
-      postgresql_privs:
+      community.postgresql.postgresql_privs:
         database: "{{ item.name }}"
         privs: ALL
         roles: PUBLIC
@@ -61,7 +61,7 @@
 
     # Revoke the default permissions on the public schema
     - name: postgres | revoke default schema permissions
-      postgresql_privs:
+      community.postgresql.postgresql_privs:
         database: "{{ item.name }}"
         obj: public
         privs: ALL
@@ -75,7 +75,7 @@
     # The default public schema is owned by postgres, and since the PUBLIC
     # privileges are revoked we must grant them back to the owner
     - name: postgres | grant database owner public schema privileges
-      postgresql_privs:
+      community.postgresql.postgresql_privs:
         database: "{{ item.name }}"
         obj: public
         privs: ALL
@@ -87,7 +87,7 @@
         - "{{ postgresql_databases }}"
 
     - name: postgres | grant connect privileges
-      postgresql_privs:
+      community.postgresql.postgresql_privs:
         database: "{{ item.1 }}"
         privs: CONNECT
         roles: "{{ item.0.user }}"
@@ -98,7 +98,7 @@
         - databases
 
     - name: postgres | grant usage privileges on default public schema
-      postgresql_privs:
+      community.postgresql.postgresql_privs:
         database: "{{ item.1 }}"
         objs: public
         privs: USAGE
@@ -111,3 +111,7 @@
 
   become: true
   become_user: "{{ postgresql_become_user }}"
+  # Need to install VM-wide packages (e.g. libselinux-python3)
+  # using the default python implementation - otherwise the task fails
+  vars:
+    ansible_python_interpreter: "/usr/bin/python3"

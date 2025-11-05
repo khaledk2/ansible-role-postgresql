@@ -23,9 +23,9 @@ def test_server_log_file_name(host):
     # Check previous day too in case this is run at midnight
     version = get_version(host)
     if host.system_info.distribution == 'rocky':
-        logdir = '/var/lib/pgsql/{version}/data/pg_log'
+        logdir = '/var/lib/pgsql/{version}/data/log'
     else:
-        logdir = '/var/lib/postgresql/{version}/main/pg_log'
+        logdir = '/var/lib/postgresql/{version}/main/log'
     date1 = datetime.today()
     date0 = date1 - timedelta(days=1)
     logdir = logdir.format(version=version)

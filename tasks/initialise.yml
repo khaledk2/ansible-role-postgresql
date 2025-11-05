@@ -3,7 +3,7 @@
 
 - block:
     - name: postgres | set permissions on data directory
-      file:
+      ansible.builtin.file:
         owner: postgres
         group: postgres
         path: "{{ postgresql_dist_datadir }}"
@@ -14,7 +14,7 @@
     - name: >-
         postgres | initialise PostgreSQL cluster (skip if data directory
         already exists)
-      command: "{{ postgresql_dist_setup }}"
+      ansible.builtin.command: "{{ postgresql_dist_setup }}"
       args:
         creates: "{{ postgresql_dist_datadir }}/PG_VERSION"
 
@@ -22,29 +22,75 @@
         PGSETUP_INITDB_OPTIONS: >-
           --encoding=UTF8 --locale=en_US.UTF-8 --auth-host=md5
 
-    - name: postgres | postgresql config file
-      template:
+    - name: postgres | check that the postgresql.conf.org file exists
+      ansible.builtin.stat:
+        path: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
+      register: org_file
+
+    - name: postgres | remove the custom configurations from the file, if any
+      ansible.builtin.command: sed -i '/# Add settings for extensions here/q' "{{ postgresql_dist_confdir }}/postgresql.conf"
+      when:
+        - not org_file.stat.exists
+
+    - name: postgres | remove the Ansible managed line, if any
+      ansible.builtin.lineinfile:
+          path: "{{ postgresql_dist_confdir }}/postgresql.conf"
+          regexp: "#Ansible managed"
+          state: absent
+      when:
+        - not org_file.stat.exists
+
+    - name: postgres | copy a postgresql.conf to postgresql.conf.org
+      become_user: "{{ postgresql_become_user }}"
+      ansible.builtin.copy:
+        src: "{{ postgresql_dist_confdir }}/postgresql.conf"
+        dest: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
+        remote_src: yes
+      check_mode: false
+      when:
+        - not org_file.stat.exists
+
+    # read the default postgresql configuration file
+    - name: postgres | get the postgres conf file contents
+      become_user: "{{ postgresql_become_user }}"
+      ansible.builtin.slurp:
+        src: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
+      register: postgres_config_file_contents_o
+
+    - name: postgres | put the postgres file content into a variable
+      ansible.builtin.set_fact: postgres_config_file_contents={{ postgres_config_file_contents_o }}
+
+    - name: postgres | copy postgresql config file
+      become_user: "{{ postgresql_become_user }}"
+      ansible.builtin.template:
         dest: >-
           {{ postgresql_dist_confdir }}/postgresql.conf
         src: "{{ postgresql_dist_conf_postgresql_src }}"
         mode: 0644
+        owner: "{{ postgresql_become_user }}"
       notify:
         - restart postgresql
 
-      become_user: "{{ postgresql_become_user }}"
+    - name: postgres | Remove the org config file if it runs in a check mode and the org file does not exist in the host
+      ansible.builtin.file:
+        path: "{{ postgresql_dist_confdir }}/postgresql.conf.org"
+        state: absent
+      check_mode: false
+      when:
+        - not org_file.stat.exists
+        - ansible_check_mode
 
     - name: postgres | configure client authorisation
-      template:
+      become_user: "{{ postgresql_become_user }}"
+      ansible.builtin.template:
         dest: "{{ postgresql_dist_confdir }}/pg_hba.conf"
         src: pg_hba-conf.j2
         mode: 0640
       notify:
         - restart postgresql
 
-      become_user: "{{ postgresql_become_user }}"
-
     - name: postgres | start service
-      service:
+      ansible.builtin.service:
         enabled: true
         name: "{{ postgresql_dist_service }}"
         state: started

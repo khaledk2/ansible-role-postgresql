@@ -31,6 +31,7 @@ postgresql_server_auth: []
 # Recursively reset the owner/group of the postgres datadir?
 postgresql_server_chown_datadir: false
 
+postgres_config_file_contents: ''
 ######################################################################
 # Internal role variables, do not modify
 ######################################################################
@@ -51,14 +52,14 @@ postgresql_dist_redhat:
     {{
       (postgresql_package_version | length > 0) |
       ternary('-' + postgresql_package_version, '')
-    }}
+    }}  
 
 # Attributes are parsed and used to set facts at tasks/debian.yml.
 # Debian variation, following the same principles of postgresql_dist_redhat
 postgresql_dist_debian:
   bindir: /usr/lib/postgresql/{{ postgresql_version }}/bin
   confdir: /etc/postgresql/{{ postgresql_version }}/main
-  conf_postgresql_src: postgresql-conf-10-ubuntu.j2
+  conf_postgresql_src: postgresql-conf.j2
   datadir: /var/lib/postgresql/{{ postgresql_version }}/main
   basename: postgresql-{{ postgresql_version }}
   service: postgresql

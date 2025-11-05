@@ -5,6 +5,7 @@
   become: true
   ansible.builtin.apt:
     update_cache: true
+    cache_valid_time: 86400
     name: >-
       {{ postgresql_dist_debian.basename }}
     state: present
@@ -13,6 +14,7 @@
   become: true
   ansible.builtin.apt:
     update_cache: true
+    cache_valid_time: 86400
     # Needs to match the Ansible interpreter
     name: >-
       python{{
@@ -21,7 +23,7 @@
     state: present
 
 - name: postgres | set debian dist variables
-  set_fact:
+  ansible.builtin.set_fact:
     postgresql_dist_datadir: "{{ postgresql_dist_debian.datadir }}"
     postgresql_dist_bindir: "{{ postgresql_dist_debian.bindir }}"
     postgresql_dist_confdir: "{{ postgresql_dist_debian.confdir }}"

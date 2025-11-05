@@ -48,13 +48,22 @@ def test_server_listen(host):
     assert listen_addresses == "listen_addresses = localhost"
 
 
+def test_backup_config_exist(host):
+    version = get_version(host)
+    if host.system_info.distribution == 'rocky':
+        config_backup = '/var/lib/pgsql/{version}/data/postgresql.conf.org'
+    else:
+        config_backup = '/etc/postgresql/{version}/main/postgresql.conf.org'
+    with host.sudo():
+        backup_file = config_backup.format(version=version)
+        assert host.file(backup_file).is_file
+
+
 def test_psql_version(host):
     ver = get_version(host)
     out = host.check_output('psql --version')
     assert out.startswith('psql (PostgreSQL) {}.'.format(ver))
 
-
-# Create
 
 def createdb(host, db, should_pass, password, name):
     try:
