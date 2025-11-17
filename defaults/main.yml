@@ -36,6 +36,12 @@ postgres_config_file_contents: ''
 # Internal role variables, do not modify
 ######################################################################
 
+version_sub_version:
+  "14": "19"
+  "15": "14"
+  "16": "10"
+  "17": "6"
+  "18": "0"
 # Attributes are parsed and used to set facts at tasks/redhat.yml.
 # Overriding the default values allow to configure future versions of
 # PostgreSQL, e.g. different paths according to the version, config, etc.
