@@ -1,20 +1,34 @@
 ---
 # tasks file for ome.postgresql rocky
 
+#- name: postgres | install server packages
+#  become: true
+#  ansible.builtin.dnf:
+#    name: >-
+#      {{ postgresql_dist_redhat.basename }}-server{{
+#         postgresql_dist_redhat.version_suffix }}
+#    state: present
+
+#- name: postgres | install extension packages
+#  become: true
+#  ansible.builtin.dnf:
+#    name: >-
+#      {{ postgresql_dist_redhat.basename }}-contrib{{
+#         postgresql_dist_redhat.version_suffix }}
+#    state: present
+
 - name: postgres | install server packages
   become: true
   ansible.builtin.dnf:
-    name: >-
-      {{ postgresql_dist_redhat.basename }}-server{{
-         postgresql_dist_redhat.version_suffix }}
+    name: "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/redhat/rhel-9-x86_64/postgresql{{ postgresql_version }}-server-{{ postgresql_version }}.{{ version_sub_version[postgresql_version] }}-1PGDG.rhel9.x86_64.rpm"
     state: present
 
 - name: postgres | install extension packages
   become: true
   ansible.builtin.dnf:
-    name: >-
-      {{ postgresql_dist_redhat.basename }}-contrib{{
-         postgresql_dist_redhat.version_suffix }}
+    name:
+      "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/redhat/rhel-9-x86_64/{{ postgresql_dist_redhat.basename }}-contrib-{{ postgresql_version }}.{{ version_sub_version[postgresql_version] }}-1PGDG.rhel9.x86_64.rpm"
+
     state: present
 
 - name: postgres | install ansible prerequisites
