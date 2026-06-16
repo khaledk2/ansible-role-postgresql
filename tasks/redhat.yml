@@ -23,11 +23,12 @@
     name: "https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
     state: present
 
-- name: postgres | disable default module
-  become: true
-  community.general.dnf_config_manager:
-    name: postgresql
-    state: disabled
+#- name: postgres | disable default module
+#  become: true
+#  community.general.dnf_config_manager:
+#    name:
+#      - postgresql
+#    state: disabled
 
 - name: postgres | install server
   become: true
