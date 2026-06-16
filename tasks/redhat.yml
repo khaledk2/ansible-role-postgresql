@@ -20,14 +20,14 @@
 - name: postgres | install server packages
   become: true
   ansible.builtin.dnf:
-    name: "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/redhat/rhel-9-x86_64/postgresql{{ postgresql_version }}-server-{{ postgresql_version }}.{{ version_sub_version[postgresql_version] }}-1PGDG.rhel9.x86_64.rpm"
+    name: "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/redhat/rhel-9-x86_64/postgresql{{ postgresql_version }}-server-{{ postgresql_version }}.{{ version_sub_version[postgresql_version] }}-2PGDG.rhel9.x86_64.rpm"
     state: present
 
 - name: postgres | install extension packages
   become: true
   ansible.builtin.dnf:
     name:
-      "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/redhat/rhel-9-x86_64/{{ postgresql_dist_redhat.basename }}-contrib-{{ postgresql_version }}.{{ version_sub_version[postgresql_version] }}-1PGDG.rhel9.x86_64.rpm"
+      "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/redhat/rhel-9-x86_64/{{ postgresql_dist_redhat.basename }}-contrib-{{ postgresql_version }}.{{ version_sub_version[postgresql_version] }}-2PGDG.rhel9.x86_64.rpm"
 
     state: present
 
