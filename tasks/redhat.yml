@@ -41,7 +41,8 @@
   become: true
   ansible.builtin.dnf:
     name:
-      "contrib-{{ postgresql_version }}"
+      "postgresql{{ postgresql_version }}-contrib"
+
 
     state: present
 
