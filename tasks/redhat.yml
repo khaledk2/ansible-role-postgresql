@@ -1,34 +1,11 @@
 ---
-# tasks file for ome.postgresql rocky
-
-#- name: postgres | install server packages
-#  become: true
-#  ansible.builtin.dnf:
-#    name: >-
-#      {{ postgresql_dist_redhat.basename }}-server{{
-#         postgresql_dist_redhat.version_suffix }}
-#    state: present
-
-#- name: postgres | install extension packages
-#  become: true
-#  ansible.builtin.dnf:
-#    name: >-
-#      {{ postgresql_dist_redhat.basename }}-contrib{{
-#         postgresql_dist_redhat.version_suffix }}
-#    state: present
+# tasks file for ome.postgresql rgel 9
 
 - name: postgres | install Repository RPM
   become: true
   ansible.builtin.dnf:
     name: "https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
     state: present
-
-#- name: postgres | disable default module
-#  become: true
-#  community.general.dnf_config_manager:
-#    name:
-#      - postgresql
-#    state: disabled
 
 - name: postgres | install server
   become: true
