@@ -21,7 +21,7 @@ platforms:
     groups:
       - extra_options
   - name: postgresql-15-r9
-    image: eniocarboni/docker-rockylinux-systemd:9
+    image: eniocarboni/docker-rockylinux-systemd
     image_version: latest
     command: /sbin/init
     privileged: true
@@ -31,7 +31,7 @@ platforms:
     groups:
       - extra_options
   - name: postgresql-16-r9
-    image: eniocarboni/docker-rockylinux-systemd:9
+    image: eniocarboni/docker-rockylinux-systemd
     image_version: latest
     command: /sbin/init
     privileged: true
@@ -41,7 +41,7 @@ platforms:
     groups:
       - extra_options
   - name: postgresql-17-r9
-    image: eniocarboni/docker-rockylinux-systemd:9
+    image: eniocarboni/docker-rockylinux-systemd
     image_version: latest
     command: /sbin/init
     privileged: true
@@ -51,7 +51,7 @@ platforms:
     groups:
       - extra_options
   - name: postgresql-18-r9
-    image: eniocarboni/docker-rockylinux-systemd:9
+    image: eniocarboni/docker-rockylinux-systemd
     image_version: latest
     command: /sbin/init
     privileged: true
